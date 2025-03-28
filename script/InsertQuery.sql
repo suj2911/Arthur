@@ -1,0 +1,20 @@
+Insert into ResultSet SELECT 
+    Token, 
+    ExpiryDate, 
+    StrikePrice, 
+    BoardLotQuantity AS LotMultiple, 
+    1 as LotSize, 
+    TickSize, 
+    100 AS Divisor, 
+    Symbol, 
+    InstrumentName, 
+	OptionType,
+	'F&O' as Segment,
+	Name,
+	'XX' as series,
+	'NSE' AS Exchange, 
+	Name,
+	BasePrice as Close, 
+    LowPriceRange as LowDPR, 
+    HighPriceRange as HighDPR 
+FROM Contract;

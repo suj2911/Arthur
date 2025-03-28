@@ -1,0 +1,3 @@
+cmake -DCMAKE_TOOLCHAIN_FILE=C:/Users/USER/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_PREFIX_PATH=C:/Users/USER/vcpkg/installed/x64-windows/share ..
+cmake --build
+

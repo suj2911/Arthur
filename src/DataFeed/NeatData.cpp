@@ -2,6 +2,8 @@
 // Created by vikram on 4/2/20.
 //
 
+#include <iostream>
+
 #include "NeatData.hpp"
 
 #include <Lancelot/Logger/Logger.hpp>
@@ -107,12 +109,15 @@ void BroadCastData(BROADCAST_ONLY_MBP* FO, short record) {
         pointer->Color.LTP    = LTP > pointer->LastTradePrice;
         pointer->Color.ATP    = ATP > pointer->AverageTradePrice;
 
+        std::cout << "\nToken " << token << " Ltp " << pointer->LastTradePrice << " Ltq " << pointer->LastTradeQuantity << std::endl;
+
         MarketEventQueue.push(pointer);
     }
 }
 
 NeatFuture::NeatFuture() : outFo(new lzo_byte[BUFFER_SIZE * 10]), unCompressData(new lzo_byte[BUFFER_SIZE * 10]) {}
 void NeatFuture::Process(char* buffer, size_t size) {
+    std::cout << "\nIn NeatFuture::Process recv len " << size << "\n";
     Data* data = reinterpret_cast<Data*>(buffer);
     //	int PacketNo = htons(data->iNoPackets);
     //	int StartPont = 4;

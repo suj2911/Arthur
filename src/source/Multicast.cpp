@@ -8,6 +8,7 @@ MulticastReceiver::MulticastReceiver(boost::asio::io_service& ioService_) : _soc
 
 void MulticastReceiver::receiverFrom(const boost::system::error_code& errorCode_, size_t size_) {
     if (!errorCode_) {
+        printf("\nTry to recv %d ", size_);
         processData(_buffer, size_);
         read();
     }
@@ -19,10 +20,18 @@ void MulticastReceiver::bindMC(const std::string& lan_, const std::string& addre
     _socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
     _socket.bind(listen_endpoint);
     _socket.set_option(boost::asio::ip::multicast::join_group(boost::asio::ip::address::from_string(address_)));
+
+    printf("\nTry to Join lan %s  %s port %d \n", lan_.c_str(), address_.c_str(), port_);
 }
 
 void MulticastReceiver::read() {
-    _socket.async_receive_from(boost::asio::buffer(_buffer, MAX_LENGTH), _endpoint, [this](const boost::system::error_code& errorCode_, size_t size_) { receiverFrom(errorCode_, size_); });
+    printf("\nTry  MulticastReceiver::read ");
+    _socket.async_receive_from(boost::asio::buffer(_buffer, MAX_LENGTH), _endpoint, [this](const boost::system::error_code& errorCode_, size_t size_) 
+    {
+        receiverFrom(errorCode_, size_);
+    });
 }
 
-void MulticastReceiver::processData(char* data_, size_t size_) { Process(data_, size_); }
+void MulticastReceiver::processData(char* data_, size_t size_) {
+    Process(data_, size_);
+}

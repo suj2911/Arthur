@@ -7,6 +7,9 @@ link_directories(${Boost_LIBRARY_DIRS})
 message(STATUS "Boost_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIRS}")
 
+
+add_compile_options("/utf-8")
+
 find_package(Threads)
 find_package(OpenGL REQUIRED)
 find_package(nlohmann_json REQUIRED)

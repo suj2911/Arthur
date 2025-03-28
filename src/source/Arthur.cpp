@@ -78,7 +78,9 @@ Arthur::Arthur(bool* closeMainWindow_) : _closeMainWindow(closeMainWindow_), _ba
     _tradeHistoryPtr      = std::make_unique<TradeHistory>();
     _optionChainPtr       = std::make_unique<OptionChain>();
     _messageBroker        = std::make_unique<MessageBroker>(_backendComService);
-    //_multicastReceiverPtr = std::make_unique<MulticastReceiver>(_backendComService);
+
+    _multicastReceiverPtr = std::make_unique<MulticastReceiver>(_backendComService);
+
     _orderBookPtr  = std::make_unique<OrderBook>(ORDER_ALL_BOOK);
     _rejectBookPtr = std::make_unique<OrderBook>(REJECT_BOOK);
     _tradeSoundPtr = std::make_unique<Sound>("collide.wav");
@@ -455,6 +457,16 @@ void Arthur::startAllThreads() {
         _threadGroup.push_back(std::move(thread));
     }
     { _messageBroker->makeConnection(_ipaddress, _port); }
+
+    {
+        _multicastReceiverPtr->bindMC("172.16.1.185", "233.1.2.5", 34330);
+
+        auto multicast_thread = std::make_unique<std::jthread>([&](std::stop_token token_) 
+        {
+            _multicastReceiverPtr->read();
+        });
+        _threadGroup.push_back(std::move(multicast_thread));
+    }
 }
 
 void Arthur::marketEventHandler(std::stop_token& stopToken_) {
