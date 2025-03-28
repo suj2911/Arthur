@@ -27,6 +27,7 @@ include(./cmake/Glfw3.cmake)
 include(./cmake/Nlohmann-json.cmake)
 include(./cmake/Fmt.cmake)
 include(./cmake/SqliteCpp.cmake)
+include(./cmake/Win32.cmake)
 
 include_directories(repo/Greeks)
 

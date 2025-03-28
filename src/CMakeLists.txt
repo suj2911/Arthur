@@ -105,11 +105,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE DataFeed)
 target_link_libraries(${PROJECT_NAME} PRIVATE Knight)
 target_link_libraries(${PROJECT_NAME} PRIVATE Greeks)
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_IMPL_OPENGL_ES2)
+target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_IMPL_OPENGL_ES3)
 target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_SOURCE_DIR}/backends)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw GL)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw )
 target_link_libraries(${PROJECT_NAME} PRIVATE Imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE ImguiFD)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${OPENGL_gl_LIBRARY})
