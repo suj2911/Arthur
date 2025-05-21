@@ -11,7 +11,7 @@
 
 class MulticastReceiver : protected CentralFeed {
   public:
-    explicit MulticastReceiver(boost::asio::io_service& ioService_, MarketEventQueueT& queue_);
+    explicit MulticastReceiver(boost::asio::io_context& ioService_, MarketEventQueueT& queue_);
 
     void BindMc(const std::string& address_, int port_, const std::string& multicast_);
 
@@ -23,4 +23,5 @@ class MulticastReceiver : protected CentralFeed {
   private:
     boost::asio::ip::udp::socket   _socket;
     boost::asio::ip::udp::endpoint _endpoint;
+    boost::asio::ip::udp::endpoint _senderEndpoint; // Add this in your class
 };

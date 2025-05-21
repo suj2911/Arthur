@@ -18,6 +18,7 @@
 #include "ConfigLoader.hpp"
 #include "Enums.hpp"
 #include "IconsMaterialDesign.h"
+#include "Knight/Scanner.hpp"
 #include "Lancelot/Structure.hpp"
 #include "Logger.hpp"
 #include "MarketWatch.hpp"

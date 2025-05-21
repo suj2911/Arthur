@@ -6,6 +6,8 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
+#include <iostream>
+
 constexpr static int TimestampLength = 50;
 
 using PriceCeT = uint32_t;
@@ -68,19 +70,25 @@ extern SpotInfoT BankNifty;
 extern SpotInfoT Nifty;
 extern SpotInfoT VIX;
 
-void CentralFeed::Process(int size_) {
-    switch (_header->_type) {
+void CentralFeed::Process(int size_) 
+{
+    switch (_header->_type) 
+    {
         case 4: {
             const auto current  = _marketData->_data;
+            //printf("\nIn 4 current._token %d",current._token);
             const auto previous = ContractInfo::GetLiveDataRef(current._token);
 
-            if (not previous) {
+            if (not previous) 
+            {
                 return;
             }
             const auto topBid = static_cast<PriceCeT>(previous->_bid[0]._price * 100);
             const auto topAsk = static_cast<PriceCeT>(previous->_ask[0]._price * 100);
             const auto ltp    = static_cast<PriceCeT>(previous->_lastTradePrice * 100);
             const auto atp    = static_cast<PriceCeT>(previous->_averageTradePrice * 100);
+
+            //std::cout<<"\ntopBid "<<topBid <<" topAsk  "<< topAsk<<" ltp "<<ltp<<"atp "<<atp<<std::endl;
 
             for (size_t i = 0; i < 5; ++i) {
                 previous->_bid[i]._price    = static_cast<PriceT>(current._bid[i]._price) / 100.0F;
@@ -128,6 +136,9 @@ void CentralFeed::Process(int size_) {
             break;
         }
         case 5: {
+
+            printf("\nIn 5 ");
+
             std::string name = std::string(_index->_data._name, 21);
             boost::algorithm::trim(name);
             LOG(INFO, "{} - value {}  change {} ", name, _index->_data._value, _index->_data._percentageChange);
@@ -143,11 +154,17 @@ void CentralFeed::Process(int size_) {
             }
             break;
         }
+        default:
+        {
+            printf("In default _header->_type %d size_ %d \n",_header->_type,size_);
+        }
+    
     }
 }
 CentralFeed::CentralFeed(MarketEventQueueT& queue_)
     : _marketEventQueue(queue_),
       _marketData(reinterpret_cast<MarketWatchDataUpdateT*>(_buffer)),
       _index(reinterpret_cast<IndexDataUpdate*>(_buffer)),
-      _header(reinterpret_cast<Lancelot::Header*>(_buffer)) {
+      _header(reinterpret_cast<Lancelot::Header*>(_buffer)) 
+      {
 }

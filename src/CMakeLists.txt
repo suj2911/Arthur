@@ -2,6 +2,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Lancelot)
 
+
+
+link_directories("C:/local/boost_1_78_0/lib64-msvc-14.3")
+
+
 add_subdirectory(API)
 #[[
 add_subdirectory(Knight)
@@ -98,16 +103,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE API)
 # target_link_libraries(${PROJECT_NAME} PRIVATE Knight)
 target_link_libraries(${PROJECT_NAME} PRIVATE Greeks)
 
+
+
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${imgui_SOURCE_DIR}/backends)
-
+target_link_libraries(${PROJECT_NAME} PRIVATE Boost::headers)
 target_link_libraries(${PROJECT_NAME} PRIVATE Imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE ImguiFD)
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(${PROJECT_NAME} PRIVATE SQLiteCpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE libpqxx::pqxx)
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost::headers)
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
 
 target_precompile_headers(${PROJECT_NAME} PUBLIC ${PRECOMPILE_HEADERS})
