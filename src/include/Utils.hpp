@@ -50,6 +50,8 @@ class Utils {
 
     static auto GetPhoenixCancelOrder(const OrderInfoPtrT& info_, int16_t user_) noexcept -> Lancelot::CancelOrder;
 
+    static std::string SideToString(Lancelot::Side side);
+
   private:
     static GlobalStrategyListT GlobalStrategyList;
 };

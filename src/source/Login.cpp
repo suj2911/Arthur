@@ -36,8 +36,8 @@ Login::Login() {
         LOG(ERROR, "Config file not found : setting.json", false);
         exit(1);
     }
-    _user     = "tws_sim3@minix.co.in";
-    _password = "123qwe";
+    _user     = "sanjay@gmail.com";
+    _password = "123456";
     _error    = "Enter user details";
 }
 void Login::Paint() {

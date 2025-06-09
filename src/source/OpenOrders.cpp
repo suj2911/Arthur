@@ -22,12 +22,42 @@ OpenOrders::OpenOrders(const OrderFormPtrT& manualOrder_, ExecutorStrandT& stran
     : _manualOrder{manualOrder_},
       _function{std::move(function_)},
       _strand{strand_},
-      _show{show_} {}
+      _show{show_},
+      _filter(BooksColumnIndex_END) {}
 
 void OpenOrders::Paint() noexcept {
     _pendingOrderUpdate.consume_all([this](const auto& pair_) { Update(pair_.first, pair_.second); });
     if (_show) {
         DrawPendingBook(&_show);
+    }
+}
+std::string OpenOrders::GetCellValue(const OrderInfoPtrT& order_, int column_index_) const {
+    switch (column_index_) {
+        case BooksColumnIndex_PF:
+            return std::to_string(order_->_portfolio);
+        case BooksColumnIndex_CONTRACT:
+            return order_->_contract;
+        case BooksColumnIndex_PRICE:
+            return std::to_string(order_->_price);
+        case BooksColumnIndex_QUANTITY:
+            return std::to_string(order_->_quantity);
+        case BooksColumnIndex_FILL_PRICE:
+            return std::to_string(order_->_fillPrice);
+        case BooksColumnIndex_FILL_QUANTITY:
+            return std::to_string(order_->_fillQuantity);
+        case BooksColumnIndex_REMAINING_QTY:
+            return std::to_string(order_->_remaining);
+        default:
+            return "";
+    }
+}
+
+void OpenOrders::UpdateFilterSuggestions() {
+    _filter.ClearAllSuggestions();
+    for (const auto& [_, order] : _container) {
+        for (int index = 0;  index < BooksColumnIndex_END; index++) {
+            _filter.UpdateSuggestions(index, GetCellValue(order, index));
+        }
     }
 }
 
@@ -36,10 +66,12 @@ void OpenOrders::DrawPendingBook(bool* show_) {
         const float frameHeight = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
 
         if (ImGui::BeginTable(BeginOpenOrdersTable, BooksColumnIndex_END, TableFlags, ImVec2(-FLT_MIN, -frameHeight))) {
-            for (const auto& name : BookTableColumnName) {
-                ImGui::TableSetupColumn(name, TableColumnFlags);
+            // Setup columns with filter buttons
+            for (int index = 0; index < BooksColumnIndex_END; index++) {
+                ImGui::TableSetupColumn(BookTableColumnName[index], TableColumnFlags);
+                _filter.DrawFilterUI(index, BookTableColumnName[index]);
             }
-
+            UpdateFilterSuggestions();
             ImGui::TableHeadersRow();
             _clipper.Begin(static_cast<int>(_container.size()));
 
@@ -51,8 +83,16 @@ void OpenOrders::DrawPendingBook(bool* show_) {
                 std::ranges::advance(end, _clipper.DisplayEnd - _clipper.DisplayStart, _container.rend());
 
                 for (auto& iterator = begin; iterator != end; ++iterator) {
-                    ImGui::TableNextRow();
+                    //ImGui::TableNextRow();
                     const OrderInfoPtrT& tradeInfo_ = iterator->second;
+                    // Apply filters
+                    if (!_filter.ApplyFilters([this, &tradeInfo_](int col) { 
+                        return GetCellValue(tradeInfo_, col); 
+                    })) {
+                        continue;
+                    }
+                    
+                    ImGui::TableNextRow();
                     ImGui::PushID(tradeInfo_->_uniqueId);
                     Utils::DrawTradeRow(tradeInfo_, _selectedRow, tradeInfo_->_uniqueId);
 
@@ -114,7 +154,120 @@ void OpenOrders::DrawPendingBook(bool* show_) {
     }
     ImGui::End();
 }
+/*
 
+// Add buffers for column filters
+char orderNumberFilter[128] = {0};
+char sideFilter[128] = {0};
+char portfolioFilter[128] = {0};
+char priceFilter[128] = {0};
+
+
+// Modify the `DrawPendingBook` method to include inline filters under each column header
+void OpenOrders::DrawPendingBook(bool* show_) {
+    if (ImGui::Begin(BeginOpenOrders, show_)) {
+        const float frameHeight = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+
+        if (ImGui::BeginTable(BeginOpenOrdersTable, BooksColumnIndex_END, TableFlags, ImVec2(-FLT_MIN, -frameHeight))) {
+            for (const auto& name : BookTableColumnName) {
+                ImGui::TableSetupColumn(name, TableColumnFlags);
+            }
+
+            // Render table headers with inline filters
+            ImGui::TableHeadersRow();
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(BooksColumnIndex_ORDER_NUMBER);
+            ImGui::InputText("##OrderNumberFilter", orderNumberFilter, sizeof(orderNumberFilter), ImGuiInputTextFlags_EnterReturnsTrue);
+
+            
+          
+            _clipper.Begin(static_cast<int>(_container.size()));
+
+            while (_clipper.Step()) {
+                auto begin = _container.rbegin();
+                std::ranges::advance(begin, _clipper.DisplayStart);
+
+                auto end = begin;
+                std::ranges::advance(end, _clipper.DisplayEnd - _clipper.DisplayStart, _container.rend());
+
+                for (auto& iterator = begin; iterator != end; ++iterator) {
+                    const OrderInfoPtrT& tradeInfo_ = iterator->second;
+
+                    // Convert numeric values to strings for filtering
+                    std::string orderNumberStr = std::to_string(tradeInfo_->_orderNumber);
+                    std::string sideStr = Utils::SideToString(tradeInfo_->_side);
+                    std::string portfolioStr = std::to_string(tradeInfo_->_portfolio);
+                    std::string priceStr = std::to_string(tradeInfo_->_price);
+
+                    // Apply filters: Skip rows that don't match the filter text
+                    if (!std::string(orderNumberFilter).empty() && orderNumberStr.find(orderNumberFilter) == std::string::npos) {
+                        continue;
+                    }
+                   
+
+                    ImGui::TableNextRow();
+                    ImGui::PushID(tradeInfo_->_uniqueId);
+                    Utils::DrawTradeRow(tradeInfo_, _selectedRow, tradeInfo_->_uniqueId);
+
+                    if (_selectedRow == tradeInfo_->_uniqueId and ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows)) {
+                        if (tradeInfo_->_portfolio == 0 and ImGui::IsKeyPressed(ImGuiKey_F2)) {
+                            OrderFormInfoT info{
+                                ._uniqueId    = tradeInfo_->_uniqueId,
+                                ._price       = tradeInfo_->_price,
+                                ._quantity    = (int)tradeInfo_->_quantity,
+                                ._lotSize     = (int)Lancelot::ContractInfo::GetLotSize(tradeInfo_->_token),
+                                ._orderNumber = tradeInfo_->_orderNumber,
+                                ._type        = OrderType_LIMIT,
+                                ._side        = tradeInfo_->_side,
+                                ._status      = OrderStatus_REPLACED,
+                                ._contract    = Lancelot::ContractInfo::GetDescription(tradeInfo_->_token),
+                                ._client      = "PRO",
+                                ._marketWatch = ContractInfo::GetLiveDataRef(tradeInfo_->_token),
+                            };
+                            _manualOrder->Update(info);
+                            ImGui::OpenPopup(MODIFY_ORDER_WINDOW);
+                        }
+                        _manualOrder->Paint(MODIFY_ORDER_WINDOW);
+
+                        if (ImGui::IsKeyPressed(ImGuiKey_F4)) {
+                            OrderHistory::Instance().LoadOrderHistory(tradeInfo_->_orderNumber);
+                            ImGui::OpenPopup(ORDER_HISTORY_POPUP_WINDOW);
+                        }
+                        OrderHistory::Instance().Paint(nullptr);
+
+                        if (tradeInfo_->_portfolio == 0 and ImGui::IsKeyPressed(ImGuiKey_Delete)) {
+                            _strand.post([&]() {
+                                _function(tradeInfo_);
+                            });
+                        }
+                    }
+                    ImGui::PopID();
+                }
+            }
+            ImGui::EndTable();
+            ImGui::Separator();
+            if (ImGui::Button("Cancel All")) {
+                _cancelOrder.clear();
+                for (const auto& value : _container) {
+                    if (value.second->_portfolio == 0) {
+                        _cancelOrder.push_back(value.second);
+                    }
+                }
+                _closeCancelPopup = true;
+                ImGui::OpenPopup(CancelAllOrderWindow);
+            }
+            DrawManualOrderRequestedForCancel();
+            ImGui::SameLine();
+            ImGui::Text("| Total : [%zu] |", _container.size());
+            ImGui::SameLine();
+            ImGui::TextColored(BuySellColor(Lancelot::Side_BUY), "| Buy : [%d] |", _buyCount);
+            ImGui::SameLine();
+            ImGui::TextColored(BuySellColor(Lancelot::Side_SELL), "| Sell : [%d] |", _sellCount);
+        }
+    }
+    ImGui::End();
+}
+     */
 void OpenOrders::DrawManualOrderRequestedForCancel() {
     if (ImGui::BeginPopupModal(CancelAllOrderWindow, &_closeCancelPopup)) {
         const float frameHeight = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();

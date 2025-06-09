@@ -25,6 +25,7 @@ set(HEADER_FILES
     ./include/Configuration.hpp
     ./include/Enums.hpp
     ./include/Login.hpp
+    ./include/FilterManager.hpp
     ./include/MarketWatch.hpp
     ./include/MessageBroker.hpp
     ./include/Multicast.hpp
@@ -57,6 +58,7 @@ set(SOURCE_FILES
     ./source/ConfigLoader.cpp
     ./source/External.cpp
     ./source/Login.cpp
+    ./source/FilterManager.cpp
     ./source/MarketWatch.cpp
     ./source/MessageBroker.cpp
     ./source/Multicast.cpp

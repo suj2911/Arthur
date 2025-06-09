@@ -313,3 +313,14 @@ auto Utils::GetPhoenixCancelOrder(const OrderInfoPtrT& info_, int16_t user_) noe
         ._orderSequence = static_cast<int16_t>(info_->_uniqueId),
     };
 }
+
+std::string Utils::SideToString(Lancelot::Side side) {
+    switch (side) {
+        case Lancelot::Side_BUY:
+            return "Buy";
+        case Lancelot::Side_SELL:
+            return "Sell";
+        default:
+            return "Unknown";
+    }
+}
