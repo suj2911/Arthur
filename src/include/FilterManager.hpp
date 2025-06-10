@@ -12,7 +12,7 @@ class FilterManager
         struct FilterState {
             bool _active = false;
             std::string _value;
-            std::vector<std::string> _suggestions;
+            std::set<std::string> _suggestions;
             bool _showSuggestions = false;
         };
         FilterManager(int numColumns_);
@@ -43,8 +43,6 @@ class FilterManager
 
 private:
     void DrawFilterDropdown(int columnIndex_, const std::string& columnName_);
-    void DrawFilterPopup(int columnIndex_);
-    
     std::vector<FilterState> _filters;
-    int _activeFilterColumn = -1;
+    
 }; 

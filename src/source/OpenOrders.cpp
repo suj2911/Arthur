@@ -23,7 +23,8 @@ OpenOrders::OpenOrders(const OrderFormPtrT& manualOrder_, ExecutorStrandT& stran
       _function{std::move(function_)},
       _strand{strand_},
       _show{show_},
-      _filter(BooksColumnIndex_END) {}
+      _filter(BooksColumnIndex_END) 
+      {}
 
 void OpenOrders::Paint() noexcept {
     _pendingOrderUpdate.consume_all([this](const auto& pair_) { Update(pair_.first, pair_.second); });
@@ -53,7 +54,7 @@ std::string OpenOrders::GetCellValue(const OrderInfoPtrT& order_, int column_ind
 }
 
 void OpenOrders::UpdateFilterSuggestions() {
-    _filter.ClearAllSuggestions();
+    //_filter.ClearAllSuggestions();
     for (const auto& [_, order] : _container) {
         for (int index = 0;  index < BooksColumnIndex_END; index++) {
             _filter.UpdateSuggestions(index, GetCellValue(order, index));
@@ -64,15 +65,17 @@ void OpenOrders::UpdateFilterSuggestions() {
 void OpenOrders::DrawPendingBook(bool* show_) {
     if (ImGui::Begin(BeginOpenOrders, show_)) {
         const float frameHeight = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
-
+        
+        UpdateFilterSuggestions();
         if (ImGui::BeginTable(BeginOpenOrdersTable, BooksColumnIndex_END, TableFlags, ImVec2(-FLT_MIN, -frameHeight))) {
+            ImGui::TableHeadersRow();
             // Setup columns with filter buttons
             for (int index = 0; index < BooksColumnIndex_END; index++) {
-                ImGui::TableSetupColumn(BookTableColumnName[index], TableColumnFlags);
+                //ImGui::TableSetupColumn(BookTableColumnName[index], TableColumnFlags);
+                ImGui::TableNextColumn();
                 _filter.DrawFilterUI(index, BookTableColumnName[index]);
             }
-            UpdateFilterSuggestions();
-            ImGui::TableHeadersRow();
+            
             _clipper.Begin(static_cast<int>(_container.size()));
 
             while (_clipper.Step()) {
@@ -154,8 +157,8 @@ void OpenOrders::DrawPendingBook(bool* show_) {
     }
     ImGui::End();
 }
-/*
 
+/*
 // Add buffers for column filters
 char orderNumberFilter[128] = {0};
 char sideFilter[128] = {0};
@@ -267,7 +270,7 @@ void OpenOrders::DrawPendingBook(bool* show_) {
     }
     ImGui::End();
 }
-     */
+   */ 
 void OpenOrders::DrawManualOrderRequestedForCancel() {
     if (ImGui::BeginPopupModal(CancelAllOrderWindow, &_closeCancelPopup)) {
         const float frameHeight = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();

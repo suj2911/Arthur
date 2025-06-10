@@ -2,6 +2,7 @@
 
 #include "Arthur_Fwd.hpp"
 #include "Structure.hpp"
+#include "FilterManager.hpp"
 
 class OpenOrders {
     using FunctionT              = std::function<void(OrderInfoPtrT)>;
@@ -21,6 +22,9 @@ class OpenOrders {
     void Update(const OrderInfoPtrT& tradeInfo_, bool insert_);
 
     void DrawManualOrderRequestedForCancel();
+    std::string GetCellValue(const OrderInfoPtrT& order_, int column_index_) const;
+
+    void UpdateFilterSuggestions();
 
   private:
     const OrderFormPtrT& _manualOrder;
@@ -41,4 +45,5 @@ class OpenOrders {
     bool _closeCancelPopup = false;
 
     ImGuiListClipper _clipper;
+    FilterManager   _filter;
 };
