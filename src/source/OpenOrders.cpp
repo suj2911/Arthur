@@ -32,6 +32,32 @@ void OpenOrders::Paint() noexcept {
         DrawPendingBook(&_show);
     }
 }
+
+/*
+uint32_t _portfolio;
+    uint32_t _uniqueId;
+    uint32_t _token;
+    
+    uint64_t _orderNumber;
+    
+    
+
+    Lancelot::Side _side;
+
+    OrderStatus _statusValue;
+    
+    std::string _time;
+    std::string _client;
+    std::string _message;
+*/
+/*
+    BooksColumnIndex_CLIENT,
+    BooksColumnIndex_STATUS,
+    BooksColumnIndex_TIME,
+    BooksColumnIndex_GATEWAY,
+    BooksColumnIndex_ORDER_NUMBER,
+    BooksColumnIndex_MESSAGE,
+*/
 std::string OpenOrders::GetCellValue(const OrderInfoPtrT& order_, int column_index_) const {
     switch (column_index_) {
         case BooksColumnIndex_PF:
@@ -48,6 +74,16 @@ std::string OpenOrders::GetCellValue(const OrderInfoPtrT& order_, int column_ind
             return std::to_string(order_->_fillQuantity);
         case BooksColumnIndex_REMAINING_QTY:
             return std::to_string(order_->_remaining);
+        case BooksColumnIndex_CLIENT:
+            return order_->_client;
+        case BooksColumnIndex_STATUS:
+            return OrderStatusInfoName[order_->_statusValue];
+        case BooksColumnIndex_TIME:
+            return order_->_time;
+        case BooksColumnIndex_ORDER_NUMBER:
+            return std::to_string(order_->_orderNumber);
+        case BooksColumnIndex_MESSAGE:
+            return order_->_message;
         default:
             return "";
     }
